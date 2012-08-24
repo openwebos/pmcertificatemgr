@@ -1,0 +1,20 @@
+[ ca ] 
+default_ca = default_ca
+
+#################################################################### 
+
+[ default_ca ]
+dir             = /var/ssl
+certificate     = $dir/cacert.pem         # The CA certificate 
+database        = $dir/index.txt          # database index file. 
+new_certs_dir   = $dir/newcerts           # default place for new certs.
+certs           = $dir/certs              # Where the issued certs are kept
+private_dir     = $dir/private            # The private key dir 
+#private_key     = $dir/private/cakey.pem  # The private key 
+serial          = $dir/serial             # The current serial number 
+authorized      = $dir/certs              # Authorized certs
+crl_dir         = $dir/crl                # certificate revocation list
+package_dir     = $dir/certs              # package dir    
+trusted_ca_dir  = $dir/trustedcerts       # trusted CA dir
+
+

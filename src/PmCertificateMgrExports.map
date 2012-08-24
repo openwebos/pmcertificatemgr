@@ -1,0 +1,99 @@
+# @@@LICENSE
+#
+#      Copyright (c) 2008-2012 Hewlett-Packard Development Company, L.P.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# LICENSE@@@
+
+libPmCertificateMgr {                                                                                                                                         
+    global:
+	# cert_cfg.h
+	CertCfgOpenConfigFile;
+	CertCfgSetObjectValue;
+	CertCfgGetObjectValue;
+	CertCfgSetObjectStrValue;
+	CertCfgGetObjectStrValue;
+	CertCfgResolveConfigValue;
+
+	# cert_db.h
+	CertReadDatabase;
+	CertInitDatabase;
+	CertGetDatabaseInfo;
+	CertGetDatabaseStrValue;
+	CertCreateDatabaseItem;
+	CertUpdateDatabaseItem;
+	CertWriteDatabase;
+	CertDatabaseCountCertsDirect;
+	CertListDatabaseCertsByStatusDirect;
+	CertListDatabaseCertsByStatus;
+	CertGetNameFromSerialNumberDirect;
+	CertGetNameFromSerialNumber;
+
+	# cert_debug.h
+	strProps;
+	strPropNames;
+	strErrorNames;
+
+	# cert_mgr.h
+	CertAddAuthorizedCert;
+	CertAddTrustedCert;
+	CertGetCertificateCount;
+	CertGetCertificateCountDirect;
+	CertMakeCertIter;
+	CertDeleteCertIter;
+	CertGetNextCert;
+	CertValidateCert;
+	CertGetAuthorizedCertInfo;
+	CertGetAuthorizedCertInfoField;
+	CertInstallKeyPackageDirect;
+	CertInstallKeyPackage;
+	CertAddClientCert;
+	CertRemoveCertificate;
+	CertGetClientCertCount;
+	CertMakeClientCertIter;
+	CertDeleteClientCertIter;
+	CertGetNextClientCert;
+	CertGetClientCertDirectory;
+	CertGetClientCertKey;
+	CertValidateClientCert;
+	CertGetCertInfo;
+	CertGetClientCertInfoField;
+	CertPemToX509;
+	CertGetX509;
+	CertValidateCertPath;
+	CertInitCertMgr;
+	CertReadKeyPackageDirect;
+	CertInstallPackageDirect;
+	CertValidateCertificate;
+	CertResetConfig;
+	returnFileType;
+
+	# cert_mgr_prv.h
+	makePathToCert;
+
+	# cert_utils.h
+	CertGetSerialNumber;
+	CertGetSerialNumberInc;
+	CertLockFile;
+	CertUnlockFile;
+	CertInitLockFiles;
+
+	# cert_x509.h
+	CertX509ReadStrProperty;
+	checkCert;
+	CertX509ReadTimeProperty;
+	CertX509Dump;
+
+    local:  *;                                                                                                                                         
+};
