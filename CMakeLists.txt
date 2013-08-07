@@ -42,6 +42,7 @@ if(${WEBOS_TARGET_MACHINE_IMPL} STREQUAL simulator)
 	webos_add_linker_options(ALL  -fno-exceptions)
 endif()
 
+add_definitions(-DCERT_DEF_CONF_FILE="${WEBOS_INSTALL_SYSCONFDIR}/ssl/openssl.cnf")
 
 add_library(PmCertificateMgr SHARED src/cert_cfg.c src/cert_db.c src/cert_mgr.c src/cert_pkcs.c src/cert_utils.c src/cert_x509.c )
 target_link_libraries(PmCertificateMgr ${OPENSSL_LDFLAGS})

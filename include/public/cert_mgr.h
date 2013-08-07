@@ -54,9 +54,6 @@ typedef enum
     CERT_MAX_LOCK
   } certLocks;
 
-/* should be /etc/ssl/openssl.cnf in production */
-#define CERT_DEF_CONF_FILE     "/etc/openssl/openssl.cnf"
-
 /*!
  * 
  * @brief Return Values

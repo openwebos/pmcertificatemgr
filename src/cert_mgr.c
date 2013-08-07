@@ -97,6 +97,14 @@ int Mkdir(const char *path)
     struct stat statbuf;
     int rc;
     const char *parent = dirname(strdup(path));
+
+    //do not make a directory if it exists
+    rc = stat(path,&statbuf);
+    if (rc == 0) {
+        //directory exists
+        return 0;
+    }
+
     rc = stat(parent,&statbuf);
     if (rc == -1) {
 	if (errno == ENOENT && path != NULL) {
