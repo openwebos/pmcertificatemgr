@@ -99,6 +99,7 @@ typedef enum
   CERT_DATABASE_OUT_OF_BOUNDS,   /*!< A db search has been exhausted         */
   CERT_DATABASE_LOCKED,          /*!< The database is unavailable            */
   CERT_TOO_MANY_HASHED_FILES,    /*!< Too many cert files with the same name */
+  CERT_CANNOT_UPDATE_PROPERTY,   /*!< should not change/update property */
   CERT_MAX_RETURN_CODE
 } CertReturnCode_t;
 

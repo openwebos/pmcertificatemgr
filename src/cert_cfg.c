@@ -273,10 +273,6 @@ int CertCfgSetObjectStrValue(certcfg_Property_t certObjStrProperty,
         {
           result = CERT_PATH_LIMIT_EXCEEDED;
         }
-      else if (certObjStrProperty >= CERTCFG_MAX_PROPERTY)
-        {
-          result = CERT_PROPERTY_NOT_FOUND;
-        }
       else
         {
           configObject.descStr[certObjStrProperty] = strdup(value);

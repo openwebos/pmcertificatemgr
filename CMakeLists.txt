@@ -32,6 +32,10 @@ pkg_check_modules(OPENSSL REQUIRED openssl)
 include_directories(${OPENSSL_INCLUDE_DIRS})
 webos_add_compiler_flags(ALL ${OPENSSL_CFLAGS_OTHER})
 
+pkg_check_modules(GLIB2 REQUIRED glib-2.0)
+include_directories(${GLIB2_INCLUDE_DIRS})
+webos_add_compiler_flags(ALL ${GLIB2_CFLAGS_OTHER})
+
 include_directories(include/public)
 webos_add_compiler_flags(ALL -Wall -O0 -g)
 webos_add_linker_options(ALL --version-script=${CMAKE_SOURCE_DIR}/src/PmCertificateMgrExports.map)
@@ -45,7 +49,7 @@ endif()
 add_definitions(-DCERT_DEF_CONF_FILE="${WEBOS_INSTALL_SYSCONFDIR}/ssl/openssl.cnf")
 
 add_library(PmCertificateMgr SHARED src/cert_cfg.c src/cert_db.c src/cert_mgr.c src/cert_pkcs.c src/cert_utils.c src/cert_x509.c )
-target_link_libraries(PmCertificateMgr ${OPENSSL_LDFLAGS})
+target_link_libraries(PmCertificateMgr ${OPENSSL_LDFLAGS} ${GLIB2_LDFLAGS})
 
 webos_build_library()
 webos_config_build_doxygen(doc Doxyfile)

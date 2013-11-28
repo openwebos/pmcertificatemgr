@@ -52,7 +52,7 @@ CertReturnCode_t p12ToFile(const char *outfile, const char *pCertPath,
                            int32_t *serialNb);
 CertReturnCode_t getPEMCertInfoPath(const char     *pPath,
                                     certMgrField_t  field,
-                                    char *buf, int *pBufLen); 
+                                    char *buf, int *pBufLen);
 
 CertReturnCode_t areSameCertFile(const char * path1, const char * path2,
                                  CertPkgType_t ctype );
@@ -60,7 +60,7 @@ CertReturnCode_t validateCertPath(const char *path,
                                   int32_t serialNb,
                                   int32_t certType,
                                   int32_t *pCMErr);
-void makeUnique    (char *path);
+// void makeUnique    (char *path);
 
 
 

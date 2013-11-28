@@ -33,6 +33,7 @@
 #include "cert_x509.h"
 
 #include <syslog.h>
+#include <glib.h>
 
 #define CERT_X509_STORE_FLAGS  0
 
@@ -70,9 +71,9 @@ int CertX509ReadStrProperty(X509 *cert, int property, char *pBuf, int len)
 
   lproperty=  make_property_ssl_equiv(property);
   cName= get_cname(property,cert);
-  
+
   if(lproperty==NID_subject_alt_name){  // if 1
-  
+
 	  dataIdx= get_subjectaltname(cert,pBuf, len);
 }  //end 1
  else{
@@ -93,7 +94,7 @@ int CertX509ReadStrProperty(X509 *cert, int property, char *pBuf, int len)
 			if (lastpos == -1){
 				if(atleast_one_entry)
 					dataIdx = 1;
-				else 
+				else
 					dataIdx = -1;
 				break;
 			}
@@ -113,9 +114,9 @@ int CertX509ReadStrProperty(X509 *cert, int property, char *pBuf, int len)
     return CERT_PROPERTY_NOT_FOUND;
   } else {
 	  // trim trailing ','
-	  int len = strlen(pBuf);
-	  if (pBuf[len-1] == ',')
-		pBuf[len-1] = '\0';
+	  int pBufLen = strlen(pBuf);
+	  if (pBuf[pBufLen-1] == ',')
+		pBuf[pBufLen-1] = '\0';
 	  return CERT_OK;
   }
 //
@@ -125,7 +126,7 @@ int CertX509ReadStrProperty(X509 *cert, int property, char *pBuf, int len)
 int get_subjectaltname(X509* cert, char* buf, int buf_len){
 
 /*
-    Copy "," separated dNSName values 
+    Copy "," separated dNSName values
     of the subjectAltName extension, to pBuf
 */
 
@@ -143,20 +144,20 @@ int get_subjectaltname(X509* cert, char* buf, int buf_len){
       syslog(LOG_INFO,"1sub_str");
 
       if((gen->type == GEN_DNS)||(gen->type == GEN_URI)){
-	if(0 < space_left)
+          if(0 < space_left)
 	  space_taken= copy_csv_to_buffer(sub_str, (char*)gen->d.ia5->data, buf_len, space_left);
 	  space_left= space_left -space_taken;
       }
 
-      if(gen->type == GEN_IPADD){
-	if(0 < space_left){
-          const int oline_len = 40;
-	  char oline[oline_len];
-	  oline[0]='\0';
-	  ip_to_string(oline, oline_len, gen);
-	  space_taken= copy_csv_to_buffer(sub_str,  oline, buf_len, space_left);
-	  space_left= space_left - space_taken;
-	}
+      if(gen->type == GEN_IPADD) {
+          if(0 < space_left) {
+              const int oline_len = 40;
+	      char oline[oline_len];
+	      oline[0]='\0';
+	      ip_to_string(oline, oline_len, gen);
+	      space_taken= copy_csv_to_buffer(sub_str,  oline, buf_len, space_left);
+	      space_left= space_left - space_taken;
+	  }
       }
 
       syslog(LOG_INFO,"2 sub_str: %s space_taken:%d space_left:%d",sub_str, space_taken, space_left);
@@ -184,13 +185,13 @@ int ip_to_string(char* oline, int oline_len, GENERAL_NAME* gen)
     for (i = 0; i < 8; i++){
       BIO_snprintf(htmp, sizeof htmp,"%X", p[0] << 8 | p[1]);
       p += 2;
-      strcat(oline, htmp);
-      if (i != 7) strcat(oline, ":");
+      g_strlcat(oline, htmp, oline_len);
+      if (i != 7) g_strlcat(oline, ":", oline_len);
     }
   }
 
   else{
-    BIO_snprintf(oline, sizeof oline, "IP Address <invalid>");
+    BIO_snprintf(oline, strlen((char*)oline), "IP Address <invalid>");
   }
 
   syslog(LOG_INFO,"IP is: %s",oline);
@@ -207,28 +208,24 @@ int copy_csv_to_buffer(char* sub_str, char* oline, const int buf_len, int space_
   // and returns the number of chararacters copied
 
   //ASN1_STRING_to_UTF8((unsigned char**)&pBuf,gen->d.ia5);
-  
+
   int req_len, space_taken;
 
   req_len= strlen((char*)oline);
 
-
-  if( (req_len+1) <= space_left ){
-    strncat(sub_str, (char*)oline,(req_len+1)); 
-    space_taken=req_len+1;
+  g_strlcat(sub_str, (char*)oline, buf_len);
+  if( (req_len+1) >  space_left ){
+      return 0;
   }
-  else{
-    strncat(sub_str, (char*)oline, space_left);  
-    sub_str[buf_len]='\0';
-    return 0;
-  }
+  space_taken=req_len+1;
 
-  if((1+space_taken) <= space_left){  
-    strcat(sub_str,",");
-    space_taken = space_taken +1; // '\0' is allready taken for in (req_len+1) 
+  if((1+space_taken) <= space_left) {
+    g_strlcat(sub_str,",", buf_len);
+    space_taken = space_taken +1; // '\0' is allready taken for in (req_len+1)
   }
 
-  return space_taken; 
+
+  return space_taken;
 }
 
 
@@ -294,16 +291,16 @@ int make_property_ssl_equiv(int property)
     case CERTX509_ISSUER_COUNTRY:
     case CERTX509_SUBJECT_COUNTRY:
 	  lProperty = NID_countryName;
-	  break;      
+	  break;
     case CERTX509_ISSUER_STATE:
     case CERTX509_SUBJECT_STATE:
 	  lProperty = NID_stateOrProvinceName;
-	  break;            
-    case CERTX509_ISSUER_LOCATION:      
+	  break;
+    case CERTX509_ISSUER_LOCATION:
     case CERTX509_SUBJECT_LOCATION:
 	  lProperty = NID_localityName;
 	  break;
-    
+
 
     default:
       lProperty = 0;
@@ -320,27 +317,27 @@ int CertX509ReadTimeProperty(X509 *cert, int property, char *pBuf, int len)
   int rValue;
   char buf[64];
   ASN1_TIME *cTime;
-  
+
   switch (property)
     {
     case CERTX509_START_DATE:
       cTime = X509_get_notBefore(cert);
-      if (CERT_OK == 
+      if (CERT_OK ==
           (rValue = getTimeString(cTime, buf, sizeof(buf))))
         {
-          strcpy(pBuf, buf);
+          g_strlcpy(pBuf, buf, len);
         }
       break;
-      
+
     case CERTX509_EXPIRATION_DATE:
       cTime = X509_get_notAfter(cert);
-      if (CERT_OK == 
+      if (CERT_OK ==
           (rValue = getTimeString(cTime, buf, sizeof(buf))))
         {
-          strcpy(pBuf, buf);
+          g_strlcpy(pBuf, buf, len);
         }
       break;
-      
+
     default:
       rValue = CERT_UNKNOWN_PROPERTY;
     }
@@ -352,9 +349,9 @@ void CertX509Dump(X509 *cert)
 #ifdef D_DEBUG_ENABLED
   char outputStr[64];
   int rVal;
-  
+
   printf("Certificate:\n");
-  if (CERT_OK == 
+  if (CERT_OK ==
       (rVal = CertX509ReadStrProperty(cert,
 				       CERTX509_ISSUER_COMMON_NAME,
 				       outputStr, 64)))
@@ -388,7 +385,7 @@ void CertX509Dump(X509 *cert)
   else
     printf("Issuer Org Name not found (%d)\n", rVal);
 
-  if (CERT_OK == 
+  if (CERT_OK ==
       (rVal = CertX509ReadStrProperty(cert,
 				       CERTX509_SUBJECT_ORGANIZATION_NAME,
 				       outputStr, 64)))
@@ -415,7 +412,7 @@ void CertX509Dump(X509 *cert)
       break;
 
     }
-  if (CERT_OK == 
+  if (CERT_OK ==
       (rVal = CertX509ReadTimeProperty(cert,
 					CERTX509_START_DATE,
 				       outputStr, 64)))
@@ -423,7 +420,7 @@ void CertX509Dump(X509 *cert)
   else
     printf("Start date not found (%d)\n", rVal);
 
-  if (CERT_OK == 
+  if (CERT_OK ==
       (rVal = CertX509ReadTimeProperty(cert,
 					CERTX509_EXPIRATION_DATE,
 				       outputStr, 64)))
@@ -448,7 +445,7 @@ int checkCert(X509 *cert, char *CAfile, char *CApath)
   STACK_OF(X509) *trusted   = NULL;
 #endif
   X509_LOOKUP *lookup    = NULL;
-  
+
   cert_ctx = X509_STORE_new();
 
   if (cert_ctx == NULL)
@@ -472,7 +469,7 @@ int checkCert(X509 *cert, char *CAfile, char *CApath)
     {
       X509_LOOKUP_load_file(lookup, NULL, X509_FILETYPE_DEFAULT);
     }
-  
+
   lookup = X509_STORE_add_lookup(cert_ctx, X509_LOOKUP_hash_dir());
 
   if (lookup == NULL)
@@ -489,7 +486,7 @@ int checkCert(X509 *cert, char *CAfile, char *CApath)
 	}
   else
     X509_LOOKUP_add_dir(lookup, NULL, X509_FILETYPE_DEFAULT);
-  
+
 #if 0 /* FUTURE EXPANSION OF CAPABILITIES  1 */
   if (untfile)
     {
@@ -508,12 +505,12 @@ int checkCert(X509 *cert, char *CAfile, char *CApath)
 			goto end;
           }
       }
-    
+
     check(cert_ctx, cert, untrusted, trusted, purpose);
-#endif    
-    
+#endif
+
  end:
-    
+
 	if (cert_ctx != NULL)
       X509_STORE_free(cert_ctx);
 
@@ -536,13 +533,13 @@ static int check(X509_STORE *ctx,
   X509_STORE_CTX *csc;
 
   //  fprintf(stdout, "%s: ", (file == NULL) ? "stdin" : file);
-  
+
   csc = X509_STORE_CTX_new();
   if (csc == NULL)
     {
       goto end;
     }
-  
+
   X509_STORE_set_flags(ctx, CERT_X509_STORE_FLAGS);
   if (!X509_STORE_CTX_init(csc, ctx, x, untrustedChain))
     {
@@ -557,7 +554,7 @@ static int check(X509_STORE *ctx,
 
   i = X509_verify_cert(csc);
   X509_STORE_CTX_free(csc);
-  
+
   ret = 0;
  end:
   if (i)
@@ -569,7 +566,7 @@ static int check(X509_STORE *ctx,
 
   if (x != NULL)
     X509_free(x);
-  
+
   return(ret);
 }
 
@@ -585,14 +582,14 @@ static STACK_OF(X509) *load_untrusted(char *certfile)
       {
         fprintf(stderr,"memory allocation failure\n");
 		goto end;
-      } 
-    
+      }
+
 	if(!(in = BIO_new_file(certfile, "r")))
       {
 		fprintf(stderr, "error opening the file, %s\n", certfile);
 		goto end;
       }
-    
+
 	/* This loads from a file, a stack of x509/crl/pkey sets */
 	if (!(sk = PEM_X509_INFO_read_bio(in, NULL, NULL, NULL)))
       {
